@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<configuration>
+  <property>
+    <name>dfs.namenode.secondary.http-address</name>
+    <value>micheal:50090</value>
+  </property>
+</configuration>

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<configuration>
+  <property>
+    <name>hadoop.http.staticuser.user</name>
+    <value>ynuser</value>
+  </property>
+</configuration>

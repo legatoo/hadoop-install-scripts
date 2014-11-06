@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<configuration>
+  <property>
+    <name>yarn.resourcemanager.webapp.address</name>
+    <value>dave:8088</value>
+  </property>
+</configuration>

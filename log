@@ -1,0 +1,59 @@
+Setting JAVA_HOME and HADOOP_HOME environment variables on all hosts...
+jose: /usr/lib/jvm/java-7-oracle/
+micheal: /usr/lib/jvm/java-7-oracle/
+dave: /usr/lib/jvm/java-7-oracle/
+Extracting Hadoop 2.5.1 distribution on all hosts...
+Creating HDFS data directories on NameNode host, Secondary NameNode host, and DataNode hosts...
+Creating log directories on all hosts...
+Creating pid directories on all hosts...
+Editing Hadoop environment scripts for log directories on all hosts...
+Editing Hadoop environment scripts for pid directories on all hosts...
+Creating base Hadoop XML config files...
+ create_config core-site.xml
+ put_config core-site.xml
+ put_config core-site.xml
+ create_config hdfs-site.xml
+ put_config hdfs-site.xml
+ put_config hdfs-site.xml
+ put_config hdfs-site.xml
+ put_config hdfs-site.xml
+ put_config hdfs-site.xml
+ put_config hdfs-site.xml
+ create_config mapred-site.xml
+ put_config mapred-site.xml
+ put_config mapred-site.xml
+ put_config mapred-site.xml
+ put_config mapred-site.xml
+ create_config yarn-site.xml
+ put_config yarn-site.xml
+ put_config yarn-site.xml
+ put_config yarn-site.xml
+ put_config yarn-site.xml
+ put_config yarn-site.xml
+ put_config yarn-site.xml
+ put_config yarn-site.xml
+ put_config yarn-site.xml
+Copying base Hadoop XML config files to all hosts...
+Creating configuration, command, and script links on all hosts...
+Formatting the NameNode...
+Copying startup scripts to all hosts...
+Starting Hadoop 2.5.1 services on all hosts...
+dave: Starting Hadoop HDFS NameNode daemon (hadoop-namenode): starting namenode, logging to /var/log/hadoop/hdfs/hadoop--namenode-student73.out
+dave: 
+micheal: Starting Hadoop HDFS Secondary NameNode daemon (hadoop-secondarynamenode): starting secondarynamenode, logging to /var/log/hadoop/hdfs/hadoop--secondarynamenode-student74.out
+micheal: 
+jose: Starting Hadoop HDFS DataNode daemon (hadoop-datanode): starting datanode, logging to /var/log/hadoop/hdfs/hadoop--datanode-student75.out
+micheal: Starting Hadoop HDFS DataNode daemon (hadoop-datanode): starting datanode, logging to /var/log/hadoop/hdfs/hadoop--datanode-student74.out
+jose: 
+micheal: 
+dave: Starting Hadoop YARN ResourceManager daemon (hadoop-yarn-resourcemanager): resourcemanager running as process 14939. Stop it first.
+dave: 
+jose: Starting Hadoop YARN NodeManager daemon (hadoop-nodemanager): nodemanager running as process 26611. Stop it first.
+jose: 
+micheal: Starting Hadoop YARN NodeManager daemon (hadoop-nodemanager): nodemanager running as process 24839. Stop it first.
+micheal: 
+dave: Starting Hadoop YARN proxy server daemon (hadoop-yarn-proxy-server): starting proxyserver, logging to /var/log/hadoop/yarn/yarn--proxyserver-student73.out
+dave: 
+Creating MapReduce Job History directories...
+dave: Starting Hadoop MapReduce History Server daemon (hadoop-historyserver): 
+Running YARN smoke test...
