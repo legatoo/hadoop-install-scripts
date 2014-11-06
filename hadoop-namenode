@@ -33,7 +33,7 @@ desc="Hadoop HDFS NameNode daemon"
 
 start() {
   echo -n $"Starting $desc (hadoop-namenode): "
-  start_daemon   ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" start namenode
+  start-daemon   ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" start namenode
   RETVAL=$?
   echo
   [ $RETVAL -eq 0 ] && touch /var/lock/subsys/hadoop-namenode
@@ -46,7 +46,7 @@ upgrade() {
 
 stop() {
   echo -n $"Stopping $desc (hadoop-namenode): "
-  start_daemon   ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" stop namenode
+  start-daemon   ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" stop namenode
   RETVAL=$?
   sleep 5
   echo

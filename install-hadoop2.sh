@@ -59,6 +59,8 @@ install()
 	if [ ! -f /opt/hadoop-"$HADOOP_VERSION".tar.gz ]; then
 		echo "Copying Hadoop $HADOOP_VERSION to all hosts..."
 		pdcp -a hadoop-"$HADOOP_VERSION".tar.gz /opt
+	else
+		echo "Hadoop $HADOOP_VERSION is there already to be extracted."
 	fi
 if [ -z "$JAVA_HOME" ]; then
 	echo "Copying JDK 1.6.0_31 to all hosts..."
@@ -77,16 +79,18 @@ fi
 #	pdsh -a "source /etc/profile"
 #	pdsh -a "source /etc/profile.d/hadoop.sh"
 
-	# the write permission for /etc/profile.d/ is 755 (default)
-	#notice here single quote is used, so $JAVA_HOME will not be expended
+	#ynuser user has been added to the root group
+	#sudo usermod -a -G root,yarn ynuser
 	pdsh -a  echo "export JAVA_HOME=$JAVA_HOME > /etc/profile.d/java.sh"
 
         pdsh -a  "source /etc/profile.d/java.sh"
         pdsh -a  echo "export HADOOP_HOME=$HADOOP_HOME > /etc/profile.d/hadoop.sh"
         pdsh -a  echo "export HADOOP_PREFIX=$HADOOP_HOME >> /etc/profile.d/hadoop.sh"
+	#add HADOOP_CONF_DIR in hadoop.sh too
+	pdsh -a  echo "export HADOOP_CONF_DIR=$HADOOP_CONF_DIR >> /etc/profile.d/hadoop.sh"
         pdsh -a  "source /etc/profile.d/hadoop.sh"
 	pdsh -a echo "export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin >> /etc/profile"
-	#pdsh -a echo "export JAVA_HOME=$JAVA_HOME >> /etc/profile"
+	
 	source /etc/profile.d/hadoop.sh
 	source /etc/profile.d/java.sh
 	source /etc/profile
@@ -166,12 +170,15 @@ fi
 		#pdsh -a "sudo ln -s $HADOOP_HOME/bin/* /usr/bin"
 		#pdsh -a "sudo ln -s $HADOOP_HOME/libexec/* /usr/libexec"
 	#fi
-#
+
 	echo "Formatting the NameNode..."
-		
-	pdsh -a "sudo mkdir -p $LOCK_DIR"
-	pdsh -w ^nn_host "source /etc/profile.d/java.sh"
-	pdsh -w ^nn_host "source /etc/profile.d/hadoop.sh"
+	
+	if [ ! -d "$LOCK_DIR" ]; then		
+		pdsh -a "sudo mkdir -p $LOCK_DIR"
+	fi
+	#pdsh -w ^nn_host "source /etc/profile.d/java.sh"
+	#pdsh -w ^nn_host "source /etc/profile.d/hadoop.sh"
+	pdsh -a  "source /etc/profile"
 	pdsh -w ^nn_host "sudo $HADOOP_HOME/bin/hdfs namenode -format"
 
 	echo "Copying startup scripts to all hosts..."

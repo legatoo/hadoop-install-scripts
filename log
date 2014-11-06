@@ -1,7 +1,8 @@
+Hadoop 2.5.1 is there already to be extracted.
 Setting JAVA_HOME and HADOOP_HOME environment variables on all hosts...
 jose: /usr/lib/jvm/java-7-oracle/
-micheal: /usr/lib/jvm/java-7-oracle/
 dave: /usr/lib/jvm/java-7-oracle/
+micheal: /usr/lib/jvm/java-7-oracle/
 Extracting Hadoop 2.5.1 distribution on all hosts...
 Creating HDFS data directories on NameNode host, Secondary NameNode host, and DataNode hosts...
 Creating log directories on all hosts...
@@ -34,7 +35,6 @@ Creating base Hadoop XML config files...
  put_config yarn-site.xml
  put_config yarn-site.xml
 Copying base Hadoop XML config files to all hosts...
-Creating configuration, command, and script links on all hosts...
 Formatting the NameNode...
 Copying startup scripts to all hosts...
 Starting Hadoop 2.5.1 services on all hosts...
@@ -42,18 +42,37 @@ dave: Starting Hadoop HDFS NameNode daemon (hadoop-namenode): starting namenode,
 dave: 
 micheal: Starting Hadoop HDFS Secondary NameNode daemon (hadoop-secondarynamenode): starting secondarynamenode, logging to /var/log/hadoop/hdfs/hadoop--secondarynamenode-student74.out
 micheal: 
-jose: Starting Hadoop HDFS DataNode daemon (hadoop-datanode): starting datanode, logging to /var/log/hadoop/hdfs/hadoop--datanode-student75.out
 micheal: Starting Hadoop HDFS DataNode daemon (hadoop-datanode): starting datanode, logging to /var/log/hadoop/hdfs/hadoop--datanode-student74.out
-jose: 
+jose: Starting Hadoop HDFS DataNode daemon (hadoop-datanode): starting datanode, logging to /var/log/hadoop/hdfs/hadoop--datanode-student75.out
 micheal: 
-dave: Starting Hadoop YARN ResourceManager daemon (hadoop-yarn-resourcemanager): resourcemanager running as process 14939. Stop it first.
-dave: 
-jose: Starting Hadoop YARN NodeManager daemon (hadoop-nodemanager): nodemanager running as process 26611. Stop it first.
 jose: 
-micheal: Starting Hadoop YARN NodeManager daemon (hadoop-nodemanager): nodemanager running as process 24839. Stop it first.
+dave: Starting Hadoop YARN ResourceManager daemon (hadoop-yarn-resourcemanager): starting resourcemanager, logging to /var/log/hadoop/yarn/yarn--resourcemanager-student73.out
+dave: 
+jose: Starting Hadoop YARN NodeManager daemon (hadoop-nodemanager): starting nodemanager, logging to /var/log/hadoop/yarn/yarn--nodemanager-student75.out
+micheal: Starting Hadoop YARN NodeManager daemon (hadoop-nodemanager): starting nodemanager, logging to /var/log/hadoop/yarn/yarn--nodemanager-student74.out
+jose: 
 micheal: 
 dave: Starting Hadoop YARN proxy server daemon (hadoop-yarn-proxy-server): starting proxyserver, logging to /var/log/hadoop/yarn/yarn--proxyserver-student73.out
 dave: 
 Creating MapReduce Job History directories...
 dave: Starting Hadoop MapReduce History Server daemon (hadoop-historyserver): 
 Running YARN smoke test...
+Number of Maps  = 16
+Samples per Map = 10000
+Wrote input for Map #0
+Wrote input for Map #1
+Wrote input for Map #2
+Wrote input for Map #3
+Wrote input for Map #4
+Wrote input for Map #5
+Wrote input for Map #6
+Wrote input for Map #7
+Wrote input for Map #8
+Wrote input for Map #9
+Wrote input for Map #10
+Wrote input for Map #11
+Wrote input for Map #12
+Wrote input for Map #13
+Wrote input for Map #14
+Wrote input for Map #15
+Starting Job
