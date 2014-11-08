@@ -79,23 +79,29 @@ pdsh -w ^all_hosts "sudo unlink /etc/hadoop"
 #echo "Uninstalling JDK 1.6.0_31 RPM..."
 #pdsh -w ^all_hosts "rpm -ev jdk-1.6.0_31-fcs.x86_64"
 #
-#echo "Removing NameNode data directory..."
-#pdsh -w ^nn_host "rm -Rf $NN_DATA_DIR"
-#
-#echo "Removing Secondary NameNode data directory..."
-#pdsh -w ^snn_host "rm -Rf $SNN_DATA_DIR"
-#
-#echo "Removing DataNode data directories..."
-#pdsh -w ^dn_hosts "rm -Rf $DN_DATA_DIR"
-#
-#echo "Removing YARN log directories..."
-#pdsh -w ^all_hosts "rm -Rf $YARN_LOG_DIR"
-#
-#echo "Removing HDFS log directories..."
-#pdsh -w ^all_hosts "rm -Rf $HADOOP_LOG_DIR"
-#
-#echo "Removing MapReduce log directories..."
-#pdsh -w ^all_hosts "rm -Rf $HADOOP_MAPRED_LOG_DIR"
+echo "Removing NameNode data directory..."
+pdsh -w ^nn_host "sudo rm -Rf $NN_DATA_DIR"
+
+echo "Removing Secondary NameNode data directory..."
+pdsh -w ^snn_host "sudo rm -Rf $SNN_DATA_DIR"
+
+echo "Removing DataNode data directories..."
+pdsh -w ^dn_hosts "sudo rm -Rf $DN_DATA_DIR"
+
+echo "Removing YARN log directories..."
+pdsh -w ^all_hosts "sudo rm -Rf $YARN_LOG_DIR"
+
+echo "Removing HDFS log directories..."
+pdsh -w ^all_hosts "sudo rm -Rf $HADOOP_LOG_DIR"
+
+echo "Removing MapReduce log directories..."
+pdsh -w ^all_hosts "sudo rm -Rf $HADOOP_MAPRED_LOG_DIR"
+
+echo "Removing everthing under /tmp..."
+#pdsh -w ^all_hosts "sudo rm -rf /tmp/*"
+
+echo "Kill all java processes..."
+pdsh -w ^all_hosts "sudo killall -9 java"
 #
 #echo "Removing hdfs system account..."
 #pdsh -w ^all_hosts "userdel -r hdfs"

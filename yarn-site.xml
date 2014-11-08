@@ -2,7 +2,7 @@
 <configuration>
   <property>
     <name>yarn.nodemanager.aux-services</name>
-    <value>mapreduce.shuffle</value>
+    <value>mapreduce_shuffle</value>
   </property>
   <property>
     <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
@@ -23,6 +23,10 @@
   <property>
     <name>yarn.resourcemanager.address</name>
     <value>student73:8032</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.hostname</name>
+    <value>student73</value>
   </property>
   <property>
     <name>yarn.resourcemanager.admin.address</name>
