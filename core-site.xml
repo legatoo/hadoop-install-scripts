@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <configuration>
   <property>
+    <name>fs.default.name</name>
+    <value>hdfs://student73:9000</value>
+  </property>
+  <property>
     <name>hadoop.http.staticuser.user</name>
     <value>ynuser</value>
   </property>

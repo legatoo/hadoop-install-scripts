@@ -33,6 +33,7 @@ YARN_PROXY_PORT=8081
 
 
 JAVA_HOME=/usr/lib/jvm/java-7-oracle/
+PROFILE=/etc/profile
 
 source ./hadoop-xml-conf.sh
 CMD_OPTIONS=$(getopt -n "$0"  -o hif --long "help,interactive,file"  -- "$@")
@@ -58,54 +59,58 @@ install()
 	
 	if [ ! -f /opt/hadoop-"$HADOOP_VERSION".tar.gz ]; then
 		echo "Copying Hadoop $HADOOP_VERSION to all hosts..."
-		pdcp -a hadoop-"$HADOOP_VERSION".tar.gz /opt
+		pdcp -w ^all_hosts hadoop-"$HADOOP_VERSION".tar.gz /opt
 	else
 		echo "Hadoop $HADOOP_VERSION is there already to be extracted."
 	fi
 if [ -z "$JAVA_HOME" ]; then
 	echo "Copying JDK 1.6.0_31 to all hosts..."
-	pdcp -a jdk-6u31-linux-x64-rpm.bin /opt
+	pdcp -w ^all_hosts jdk-6u31-linux-x64-rpm.bin /opt
 
 	echo "Installing JDK 1.6.0_31 on all hosts..."
-	pdsh -a chmod a+x /opt/jdk-6u31-linux-x64-rpm.bin
-	pdsh -a /opt/jdk-6u31-linux-x64-rpm.bin -noregister 1>&- 2>&-
+	pdsh -w ^all_hosts chmod a+x /opt/jdk-6u31-linux-x64-rpm.bin
+	pdsh -w ^all_hosts /opt/jdk-6u31-linux-x64-rpm.bin -noregister 1>&- 2>&-
 	JAVA_HOME=/usr/java/jdk1.6.0_31
 fi
 	echo "Setting JAVA_HOME and HADOOP_HOME environment variables on all hosts..."
-#	pdsh -a "sudo echo 'export JAVA_HOME=$JAVA_HOME' >> /etc/profile"
-#	pdsh -a "source /etc/profile.d/java.sh"
-#	pdsh -a "sudo echo 'export HADOOP_HOME=$HADOOP_HOME' >> /etc/profile"
-#	pdsh -a "sudo echo 'export HADOOP_PREFIX=$HADOOP_HOME' >> /etc/profile"
-#	pdsh -a "source /etc/profile"
-#	pdsh -a "source /etc/profile.d/hadoop.sh"
+#	pdsh -w ^all_hosts "sudo echo 'export JAVA_HOME=$JAVA_HOME' >> /etc/profile"
+#	pdsh -w ^all_hosts "source /etc/profile.d/java.sh"
+#	pdsh -w ^all_hosts "sudo echo 'export HADOOP_HOME=$HADOOP_HOME' >> /etc/profile"
+#	pdsh -w ^all_hosts "sudo echo 'export HADOOP_PREFIX=$HADOOP_HOME' >> /etc/profile"
+#	pdsh -w ^all_hosts "source /etc/profile"
+#	pdsh -w ^all_hosts "source /etc/profile.d/hadoop.sh"
 
 	#ynuser user has been added to the root group
-	#sudo usermod -a -G root,yarn ynuser
-	pdsh -a  echo "export JAVA_HOME=$JAVA_HOME > /etc/profile.d/java.sh"
+	#sudo usermod -w ^all_hosts -G root,yarn ynuser
+	pdsh -w ^all_hosts  echo "export JAVA_HOME=$JAVA_HOME > /etc/profile.d/java.sh"
 
-        pdsh -a  "source /etc/profile.d/java.sh"
-        pdsh -a  echo "export HADOOP_HOME=$HADOOP_HOME > /etc/profile.d/hadoop.sh"
-        pdsh -a  echo "export HADOOP_PREFIX=$HADOOP_HOME >> /etc/profile.d/hadoop.sh"
+        pdsh -w ^all_hosts  "source /etc/profile.d/java.sh"
+        pdsh -w ^all_hosts  echo "export HADOOP_HOME=$HADOOP_HOME > /etc/profile.d/hadoop.sh"
+        pdsh -w ^all_hosts  echo "export HADOOP_PREFIX=$HADOOP_HOME >> /etc/profile.d/hadoop.sh"
 	#add HADOOP_CONF_DIR in hadoop.sh too
-	pdsh -a  echo "export HADOOP_CONF_DIR=$HADOOP_CONF_DIR >> /etc/profile.d/hadoop.sh"
-        pdsh -a  "source /etc/profile.d/hadoop.sh"
-	pdsh -a echo "export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin >> /etc/profile"
+	pdsh -w ^all_hosts  echo "export HADOOP_CONF_DIR=$HADOOP_CONF_DIR >> /etc/profile.d/hadoop.sh"
+        pdsh -w ^all_hosts  "source /etc/profile.d/hadoop.sh"
 	
-	source /etc/profile.d/hadoop.sh
-	source /etc/profile.d/java.sh
-	source /etc/profile
-	pdsh -a "source /etc/profile"
-	pdsh -a  "echo $JAVA_HOME"
+	#append PATH to profile file only if it isn't set	
+	if ! grep -q "PATH=" "$PROFILE" ; then
+		pdsh -w ^all_hosts echo "export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin >> /etc/profile"
+	fi
+	
+	#source /etc/profile.d/hadoop.sh
+	#source /etc/profile.d/java.sh
+	#source /etc/profile
+	pdsh -w ^all_hosts "source /etc/profile"
+	pdsh -w ^all_hosts  "echo $JAVA_HOME"
 
 	echo "Extracting Hadoop $HADOOP_VERSION distribution on all hosts..."
-	pdsh -a tar -zxf /opt/hadoop-"$HADOOP_VERSION".tar.gz -C /opt
+	pdsh -w ^all_hosts tar -zxf /opt/hadoop-"$HADOOP_VERSION".tar.gz -C /opt
 
 	#in my system, ynuser the only yarn user.
 #	echo "Creating system accounts and groups on all hosts..."
-#	pdsh -a "sudo groupadd hadoop"
-#	pdsh -a "sudo useradd -g hadoop yarn"
-#	pdsh -a "sudo useradd -g hadoop hdfs"
-#	pdsh -a "sudo useradd -g hadoop mapred"
+#	pdsh -w ^all_hosts "sudo groupadd hadoop"
+#	pdsh -w ^all_hosts "sudo useradd -g hadoop yarn"
+#	pdsh -w ^all_hosts "sudo useradd -g hadoop hdfs"
+#	pdsh -w ^all_hosts "sudo useradd -g hadoop mapred"
 
 	echo "Creating HDFS data directories on NameNode host, Secondary NameNode host, and DataNode hosts..."
 	pdsh -w ^nn_host "sudo mkdir -p $NN_DATA_DIR && sudo chown ynuser:yarn $NN_DATA_DIR"
@@ -113,24 +118,24 @@ fi
 	pdsh -w ^dn_hosts "sudo mkdir -p $DN_DATA_DIR && sudo chown ynuser:yarn $DN_DATA_DIR"
 
 	echo "Creating log directories on all hosts..."
-	pdsh -a "sudo mkdir -p $YARN_LOG_DIR && sudo chown ynuser:yarn $YARN_LOG_DIR"
-	pdsh -a "sudo mkdir -p $HADOOP_LOG_DIR && sudo chown ynuser:yarn $HADOOP_LOG_DIR"
-	pdsh -a "sudo mkdir -p $HADOOP_MAPRED_LOG_DIR && sudo chown ynuser:yarn $HADOOP_MAPRED_LOG_DIR"
+	pdsh -w ^all_hosts "sudo mkdir -p $YARN_LOG_DIR && sudo chown ynuser:yarn $YARN_LOG_DIR"
+	pdsh -w ^all_hosts "sudo mkdir -p $HADOOP_LOG_DIR && sudo chown ynuser:yarn $HADOOP_LOG_DIR"
+	pdsh -w ^all_hosts "sudo mkdir -p $HADOOP_MAPRED_LOG_DIR && sudo chown ynuser:yarn $HADOOP_MAPRED_LOG_DIR"
 
 	echo "Creating pid directories on all hosts..."
-	pdsh -a "sudo mkdir -p $YARN_PID_DIR && sudo chown ynuser:yarn $YARN_PID_DIR"
-	pdsh -a "sudo mkdir -p $HADOOP_PID_DIR && sudo chown ynuser:yarn $HADOOP_PID_DIR"
-	pdsh -a "sudo mkdir -p $HADOOP_MAPRED_PID_DIR && sudo chown ynuser:yarn $HADOOP_MAPRED_PID_DIR"
+	pdsh -w ^all_hosts "sudo mkdir -p $YARN_PID_DIR && sudo chown ynuser:yarn $YARN_PID_DIR"
+	pdsh -w ^all_hosts "sudo mkdir -p $HADOOP_PID_DIR && sudo chown ynuser:yarn $HADOOP_PID_DIR"
+	pdsh -w ^all_hosts "sudo mkdir -p $HADOOP_MAPRED_PID_DIR && sudo chown ynuser:yarn $HADOOP_MAPRED_PID_DIR"
 
 	echo "Editing Hadoop environment scripts for log directories on all hosts..."
-	pdsh -a echo "export HADOOP_LOG_DIR=$HADOOP_LOG_DIR >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh"
-	pdsh -a echo "export YARN_LOG_DIR=$YARN_LOG_DIR >> $HADOOP_HOME/etc/hadoop/yarn-env.sh"
-	pdsh -a echo "export HADOOP_MAPRED_LOG_DIR=$HADOOP_MAPRED_LOG_DIR >> $HADOOP_HOME/etc/hadoop/mapred-env.sh"
+	pdsh -w ^all_hosts echo "export HADOOP_LOG_DIR=$HADOOP_LOG_DIR >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh"
+	pdsh -w ^all_hosts echo "export YARN_LOG_DIR=$YARN_LOG_DIR >> $HADOOP_HOME/etc/hadoop/yarn-env.sh"
+	pdsh -w ^all_hosts echo "export HADOOP_MAPRED_LOG_DIR=$HADOOP_MAPRED_LOG_DIR >> $HADOOP_HOME/etc/hadoop/mapred-env.sh"
 
 	echo "Editing Hadoop environment scripts for pid directories on all hosts..."
-	pdsh -a echo "export HADOOP_PID_DIR=$HADOOP_PID_DIR >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh"
-	pdsh -a echo "export YARN_PID_DIR=$YARN_PID_DIR >> $HADOOP_HOME/etc/hadoop/yarn-env.sh"
-	pdsh -a echo "export HADOOP_MAPRED_PID_DIR=$HADOOP_MAPRED_PID_DIR >> $HADOOP_HOME/etc/hadoop/mapred-env.sh"
+	pdsh -w ^all_hosts echo "export HADOOP_PID_DIR=$HADOOP_PID_DIR >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh"
+	pdsh -w ^all_hosts echo "export YARN_PID_DIR=$YARN_PID_DIR >> $HADOOP_HOME/etc/hadoop/yarn-env.sh"
+	pdsh -w ^all_hosts echo "export HADOOP_MAPRED_PID_DIR=$HADOOP_MAPRED_PID_DIR >> $HADOOP_HOME/etc/hadoop/mapred-env.sh"
 
 	echo "Creating base Hadoop XML config files..."
 	create_config --file core-site.xml
@@ -139,11 +144,13 @@ fi
 
 	create_config --file hdfs-site.xml
 	put_config --file hdfs-site.xml --property dfs.namenode.name.dir --value "$NN_DATA_DIR"
+	put_config --file hdfs-site.xml --property dfs.replication --value "2"
 	put_config --file hdfs-site.xml --property fs.checkpoint.dir --value "$SNN_DATA_DIR"
 	put_config --file hdfs-site.xml --property fs.checkpoint.edits.dir --value "$SNN_DATA_DIR"
 	put_config --file hdfs-site.xml --property dfs.datanode.data.dir --value "$DN_DATA_DIR"
 	put_config --file hdfs-site.xml --property dfs.namenode.http-address --value "$nn:50070"
 	put_config --file hdfs-site.xml --property dfs.namenode.secondary.http-address --value "$snn:50090"
+	put_config --file hdfs-site.xml --property dfs.permissions.enabled --value "false"
 
 	create_config --file mapred-site.xml
 	put_config --file mapred-site.xml --property mapreduce.framework.name --value yarn
@@ -162,59 +169,69 @@ fi
 	put_config --file yarn-site.xml --property yarn.resourcemanager.webapp.address --value "$rmgr:8088"
 
 	echo "Copying base Hadoop XML config files to all hosts..."
-	pdcp -a core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml $HADOOP_HOME/etc/hadoop/
+	pdcp -w ^all_hosts core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml $HADOOP_HOME/etc/hadoop/
 
 	#if [ ! -f /etc/hadoop/container-executor ]; then
 		#echo "Creating configuration, command, and script links on all hosts..."
-		pdsh -a "sudo ln -s $HADOOP_HOME/etc/hadoop /etc/hadoop"
-		#pdsh -a "sudo ln -s $HADOOP_HOME/bin/* /usr/bin"
-		#pdsh -a "sudo ln -s $HADOOP_HOME/libexec/* /usr/libexec"
+		pdsh -w ^all_hosts "sudo ln -s $HADOOP_HOME/etc/hadoop /etc/hadoop"
+		#pdsh -w ^all_hosts "sudo ln -s $HADOOP_HOME/bin/* /usr/bin"
+		#pdsh -w ^all_hosts "sudo ln -s $HADOOP_HOME/libexec/* /usr/libexec"
 	#fi
-
+	
+#	pdsh -w ^nn_hosts "echo 'micheal' > $HADOOP_HOME/etc/hadoop/slaves "
+#	pdsh -w ^nn_hosts "echo 'jose' >> $HADOOP_HOME/etc/hadoop/slaves"
+	echo 'student74' > $HADOOP_HOME/etc/hadoop/slaves
+	echo 'student75' >> $HADOOP_HOME/etc/hadoop/slaves
 	echo "Formatting the NameNode..."
 	
 	if [ ! -d "$LOCK_DIR" ]; then		
-		pdsh -a "sudo mkdir -p $LOCK_DIR"
+		pdsh -w ^all_hosts "sudo mkdir -p $LOCK_DIR"
 	fi
 	#pdsh -w ^nn_host "source /etc/profile.d/java.sh"
 	#pdsh -w ^nn_host "source /etc/profile.d/hadoop.sh"
-	pdsh -a  "source /etc/profile"
-	pdsh -w ^nn_host "sudo $HADOOP_HOME/bin/hdfs namenode -format"
-
-	echo "Copying startup scripts to all hosts..."
-	pdcp -w ^nn_host hadoop-namenode /etc/init.d/
-	pdcp -w ^snn_host hadoop-secondarynamenode /etc/init.d/
-	pdcp -w ^dn_hosts hadoop-datanode /etc/init.d/
-	pdcp -w ^rm_host hadoop-resourcemanager /etc/init.d/
-	pdcp -w ^nm_hosts hadoop-nodemanager /etc/init.d/
-	pdcp -w ^mr_history_host hadoop-historyserver /etc/init.d/
-	pdcp -w ^yarn_proxy_host hadoop-proxyserver /etc/init.d/
+	sed -i "s|\${JAVA_HOME}|$JAVA_HOME|g" $HADOOP_HOME/etc/hadoop/hadoop-env.sh 
+	scp $HADOOP_HOME/etc/hadoop/hadoop-env.sh ynuser@student74:$HADOOP_HOME/etc/hadoop/
+	scp $HADOOP_HOME/etc/hadoop/hadoop-env.sh ynuser@student75:$HADOOP_HOME/etc/hadoop/
+	pdsh -w ^nn_host "su - ynuser -c '$HADOOP_HOME/bin/hdfs namenode -format'" #/usr/bin/expect -c 'expect "\n" { eval spawn pdsh -w ^nn_host "sudo $HADOOP_HOME/bin/hdfs namenode -format"; interact }'
+#	echo "Copying startup scripts to all hosts..."
+#	pdcp -w ^nn_host hadoop-namenode /etc/init.d/
+#	pdcp -w ^snn_host hadoop-secondarynamenode /etc/init.d/
+#	pdcp -w ^dn_hosts hadoop-datanode /etc/init.d/
+#	pdcp -w ^rm_host hadoop-resourcemanager /etc/init.d/
+#	pdcp -w ^nm_hosts hadoop-nodemanager /etc/init.d/
+#	pdcp -w ^mr_history_host hadoop-historyserver /etc/init.d/
+#	pdcp -w ^yarn_proxy_host hadoop-proxyserver /etc/init.d/
 
 	echo "Starting Hadoop $HADOOP_VERSION services on all hosts..."
-	pdsh -w ^nn_host "sudo chmod 755 /etc/init.d/hadoop-namenode && sudo sysv-rc-conf hadoop-namenode on && sudo service hadoop-namenode start"
-	pdsh -w ^snn_host "sudo chmod 755 /etc/init.d/hadoop-secondarynamenode && sudo sysv-rc-conf hadoop-secondarynamenode on && sudo service hadoop-secondarynamenode start"
-	pdsh -w ^dn_hosts "sudo chmod 755 /etc/init.d/hadoop-datanode && sudo sysv-rc-conf hadoop-datanode on && sudo service hadoop-datanode start"
-	pdsh -w ^rm_host "sudo chmod 755 /etc/init.d/hadoop-resourcemanager && sudo  sysv-rc-conf hadoop-resourcemanager on && sudo service hadoop-resourcemanager start"
-	pdsh -w ^nm_hosts "sudo chmod 755 /etc/init.d/hadoop-nodemanager && sudo sysv-rc-conf hadoop-nodemanager on && sudo service hadoop-nodemanager start"
+	#pdsh -w ^nn_host "sudo chmod 755 /etc/init.d/hadoop-namenode && sudo sysv-rc-conf hadoop-namenode on && sudo service hadoop-namenode start"
+	#pdsh -w ^snn_host "sudo chmod 755 /etc/init.d/hadoop-secondarynamenode && sudo sysv-rc-conf hadoop-secondarynamenode on && sudo service hadoop-secondarynamenode start"
+	#pdsh -w ^dn_hosts "sudo chmod 755 /etc/init.d/hadoop-datanode && sudo sysv-rc-conf hadoop-datanode on && sudo service hadoop-datanode start"
+	#pdsh -w ^rm_host "sudo chmod 755 /etc/init.d/hadoop-resourcemanager && sudo  sysv-rc-conf hadoop-resourcemanager on && sudo service hadoop-resourcemanager start"
+	#pdsh -w ^nm_hosts "sudo chmod 755 /etc/init.d/hadoop-nodemanager && sudo sysv-rc-conf hadoop-nodemanager on && sudo service hadoop-nodemanager start"
 
-	pdsh -w ^yarn_proxy_host "sudo chmod 755 /etc/init.d/hadoop-proxyserver && sudo  sysv-rc-conf hadoop-proxyserver on && sudo service hadoop-proxyserver start"
+	#pdsh -w ^yarn_proxy_host "sudo chmod 755 /etc/init.d/hadoop-proxyserver && sudo  sysv-rc-conf hadoop-proxyserver on && sudo service hadoop-proxyserver start"
 
+	source $HADOOP_HOME/sbin/start-all.sh
 	echo "Creating MapReduce Job History directories..."
-	sudo hadoop fs -mkdir -p /ynuser/history/done_intermediate
-	sudo hadoop fs -chown -R ynuser:yarn /ynuser
-	sudo hadoop fs -chmod -R g+rwx /ynuser
+	#source /etc/profile
+	su - ynuser -c "hadoop fs -mkdir -p /ynuser/history/done_intermediate"
+	su - ynuser -c " hadoop fs -chown -R ynuser:yarn /ynuser"
+	su - ynuser -c " hadoop fs -chmod -R g+rwx /ynuser"
 
-	pdsh -w ^mr_history_host "sudo chmod 755 /etc/init.d/hadoop-historyserver && sudo sysv-rc-conf hadoop-historyserver on && sudo service hadoop-historyserver start"
-
+	#pdsh -w ^mr_history_host "sudo chmod 755 /etc/init.d/hadoop-historyserver && sudo sysv-rc-conf hadoop-historyserver on && sudo service hadoop-historyserver start"
+	
+	#source $HADOOP_HOME/sbin/start-all.sh
 	echo "Running YARN smoke test..."
-	pdsh -a "sudo usermod -a -G yarn $(whoami)"
-	sudo hadoop fs -mkdir -p /user/$(whoami)
-	sudo hadoop fs -chown $(whoami):$(whoami) /user/$(whoami)
-	#source /etc/profile.d/java.sh
-	#source /etc/profile.d/hadoop.sh
+	#pdsh -w ^all_hosts "sudo usermod -a -G yarn $(whoami)"
+	su - ynuser -c  hadoop fs -mkdir -p /user/$(whoami)
+	su - ynuser -c  hadoop fs -chown -R $(whoami):$(whoami) /user/$(whoami)
+	source /etc/profile.d/java.sh
+	source /etc/profile.d/hadoop.sh
 	source /etc/hadoop/hadoop-env.sh
 	source /etc/hadoop/yarn-env.sh
 	hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-$HADOOP_VERSION.jar pi -Dmapreduce.clientfactory.class.name=org.apache.hadoop.mapred.YarnClientFactory -libjars $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-$HADOOP_VERSION.jar 16 10000
+
+#	hadoop job -list | egrep '^job' | awk '{print $1}' | xargs -n 1 -I {} sh -c "hadoop job -status {} | egrep '^tracking' | awk '{print \$3}'" | xargs -n 1 -I{} sh -c "echo -n {} | sed 's/.*jobid=//'; echo -n ' ';curl -s -XGET {} | grep 'Job Name' | sed 's/.* //' | sed 's/<br>//'"
 }
 
 interactive()

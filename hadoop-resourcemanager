@@ -34,7 +34,7 @@ desc="Hadoop YARN ResourceManager daemon"
 
 start() {
   echo -n $"Starting $desc (hadoop-yarn-resourcemanager): "
-  start_daemon   ${HADOOP_HOME}/sbin/yarn-daemon.sh --config "${HADOOP_CONF_DIR}" start resourcemanager
+  source   ${HADOOP_HOME}/sbin/yarn-daemon.sh --config "${HADOOP_CONF_DIR}" start resourcemanager
   RETVAL=$?
   echo
   [ $RETVAL -eq 0 ] && touch /var/lock/subsys/hadoop-yarn-resourcemanager
@@ -43,7 +43,7 @@ start() {
 
 stop() {
   echo -n $"Stopping $desc (hadoop-yarn-resourcemanager): "
-  start_daemon   ${HADOOP_HOME}/sbin/yarn-daemon.sh --config "${HADOOP_CONF_DIR}" stop resourcemanager
+  source   ${HADOOP_HOME}/sbin/yarn-daemon.sh --config "${HADOOP_CONF_DIR}" stop resourcemanager
   RETVAL=$?
   sleep 5
   echo

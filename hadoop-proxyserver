@@ -32,7 +32,7 @@ desc="Hadoop YARN proxy server daemon"
 
 start() {
   echo -n $"Starting $desc (hadoop-yarn-proxy-server): "
-  start_daemon   $HADOOP_HOME/sbin/yarn-daemon.sh --config "${HADOOP_CONF_DIR}" start proxyserver
+  source   $HADOOP_HOME/sbin/yarn-daemon.sh --config "${HADOOP_CONF_DIR}" start proxyserver
   RETVAL=$?
   echo
   [ $RETVAL -eq 0 ] && touch /var/lock/subsys/hadoop-yarn-proxy-server
@@ -41,7 +41,7 @@ start() {
 
 stop() {
   echo -n $"Stopping $desc (hadoop-yarn-proxy-server): "
-  start_daemon   $HADOOP_HOME/sbin/yarn-daemon.sh --config "${HADOOP_CONF_DIR}" stop proxyserver
+  source   $HADOOP_HOME/sbin/yarn-daemon.sh --config "${HADOOP_CONF_DIR}" stop proxyserver
   RETVAL=$?
   sleep 5
   echo

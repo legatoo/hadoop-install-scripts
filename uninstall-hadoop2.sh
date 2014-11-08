@@ -36,6 +36,9 @@ pdsh -w ^all_hosts "rm -f /etc/init.d/hadoop-*"
 echo "Removing Hadoop 2 distribution tarball..."
 pdsh -w ^all_hosts "rm -f /opt/hadoop-2*.tar.gz"
 
+echo "Delete anything under HDFS Directory"
+pdsh -w ^nn_host "sudo rm -rf $NN_DATA_DIR/*"
+
 #if [ -z "$JAVA_HOME" ]; then
 #  echo "Removing JDK 1.6.0_31 distribution..."
 #  pdsh -w ^all_hosts "rm -f /opt/jdk*"
@@ -106,3 +109,5 @@ pdsh -w ^all_hosts "sudo unlink /etc/hadoop"
 #echo "Removing hadoop system group..."
 #pdsh -w ^all_hosts "groupdel hadoop"
 
+#remove HDFS file system, otherwise install script will get stuck in the re-formant stage
+#since it needs a confirmation from user input

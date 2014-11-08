@@ -1,7 +1,35 @@
 <?xml version="1.0"?>
 <configuration>
   <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>/var/data/hadoop/hdfs/nn</value>
+  </property>
+  <property>
+    <name>dfs.replication</name>
+    <value>2</value>
+  </property>
+  <property>
+    <name>fs.checkpoint.dir</name>
+    <value>/var/data/hadoop/hdfs/snn</value>
+  </property>
+  <property>
+    <name>fs.checkpoint.edits.dir</name>
+    <value>/var/data/hadoop/hdfs/snn</value>
+  </property>
+  <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>/var/data/hadoop/hdfs/dn</value>
+  </property>
+  <property>
+    <name>dfs.namenode.http-address</name>
+    <value>student73:50070</value>
+  </property>
+  <property>
     <name>dfs.namenode.secondary.http-address</name>
-    <value>micheal:50090</value>
+    <value>student74:50090</value>
+  </property>
+  <property>
+    <name>dfs.permissions.enabled</name>
+    <value>false</value>
   </property>
 </configuration>

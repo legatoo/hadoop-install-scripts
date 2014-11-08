@@ -31,7 +31,7 @@ desc="Hadoop MapReduce History Server daemon"
 
 start() {
   echo -n $"Starting $desc (hadoop-historyserver): "
-  start-daemon    ${HADOOP_HOME}/sbin/mr-jobhistory-daemon.sh --config "${HADOOP_CONF_DIR}" start historyserver
+  source    ${HADOOP_HOME}/sbin/mr-jobhistory-daemon.sh --config "${HADOOP_CONF_DIR}" start historyserver
   RETVAL=$?
   echo
   [ $RETVAL -eq 0 ] && touch /var/lock/subsys/hadoop-historyserver
@@ -40,7 +40,7 @@ start() {
 
 stop() {
   echo -n $"Stopping $desc (hadoop-historyserver): "
-  start-daemon    ${HADOOP_HOME}/sbin/mr-jobhistory-daemon.sh --config "${HADOOP_CONF_DIR}" stop historyserver
+  source    ${HADOOP_HOME}/sbin/mr-jobhistory-daemon.sh --config "${HADOOP_CONF_DIR}" stop historyserver
   RETVAL=$?
   sleep 5
   echo

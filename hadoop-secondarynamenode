@@ -27,7 +27,9 @@ source /etc/profile.d/java.sh
 source /lib/lsb/init-functions
 source ${HADOOP_HOME}/etc/hadoop/hadoop-env.sh
 
-sudo mkdir /var/lock/subsys
+if [ ! -d /var/lock/subsys ]; then
+	sudo mkdir /var/lock/subsys
+fi
 
 RETVAL=0
 PIDFILE="${HADOOP_PID_DIR}/hadoop-hdfs-secondarynamenode.pid"
@@ -35,7 +37,7 @@ desc="Hadoop HDFS Secondary NameNode daemon"
 
 start() {
   echo -n $"Starting $desc (hadoop-secondarynamenode): "
-  start_daemon   ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" start secondarynamenode
+  source   ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" start secondarynamenode
   RETVAL=$?
   echo
   [ $RETVAL -eq 0 ] && touch /var/lock/subsys/hadoop-secondarynamenode
@@ -48,7 +50,7 @@ upgrade() {
 
 stop() {
   echo -n $"Stopping $desc (hadoop-secondarynamenode): "
-  start_daemon   ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" stop secondarynamenode
+  source   ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" stop secondarynamenode
   RETVAL=$?
   sleep 5
   echo

@@ -33,9 +33,9 @@ desc="Hadoop HDFS DataNode daemon"
 start() {
   echo -n $"Starting $desc (hadoop-datanode): "
   if [ -n "$HADOOP_SECURE_DN_USER" ]; then
-    start_daemon ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" start datanode
+    source  ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" start datanode
   else
-    start_daemon  ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" start datanode
+    source  ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" start datanode
   fi
   RETVAL=$?
   echo
@@ -46,9 +46,9 @@ start() {
 stop() {
   echo -n $"Stopping $desc (hadoop-datanode): "
   if [ -n "$HADOOP_SECURE_DN_USER" ]; then
-    start_daemon ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" stop datanode
+     source ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" stop datanode
   else
-    start_daemon  ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" stop datanode
+     source  ${HADOOP_HOME}/sbin/hadoop-daemon.sh --config "${HADOOP_CONF_DIR}" stop datanode
   fi
   RETVAL=$?
   sleep 5

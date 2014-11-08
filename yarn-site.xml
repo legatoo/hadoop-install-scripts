@@ -1,7 +1,35 @@
 <?xml version="1.0"?>
 <configuration>
   <property>
+    <name>yarn.nodemanager.aux-services</name>
+    <value>mapreduce.shuffle</value>
+  </property>
+  <property>
+    <name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
+    <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+  </property>
+  <property>
+    <name>yarn.web-proxy.address</name>
+    <value>student73:8081</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.scheduler.address</name>
+    <value>student73:8030</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.resource-tracker.address</name>
+    <value>student73:8031</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.address</name>
+    <value>student73:8032</value>
+  </property>
+  <property>
+    <name>yarn.resourcemanager.admin.address</name>
+    <value>student73:8033</value>
+  </property>
+  <property>
     <name>yarn.resourcemanager.webapp.address</name>
-    <value>dave:8088</value>
+    <value>student73:8088</value>
   </property>
 </configuration>
