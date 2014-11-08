@@ -16,7 +16,7 @@ Before you use these scripts:
 
 7. .....can't remember all of them. will post all inofrmation in my blog later
 
-
+My environment: Ubuntu14.04 with Hadoop 2.5.1
 
 Feel free to contact via email.
 
