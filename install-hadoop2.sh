@@ -22,6 +22,7 @@ HADOOP_MAPRED_PID_DIR=/var/run/hadoop/mapred
 LOCK_DIR=/var/lock/subsys
 HTTP_STATIC_USER=ynuser
 YARN_PROXY_PORT=8081
+HADOOP_CONF_DIR=/etc/hadoop
 
 #using command below to install oracle java7 se on ubuntu
 #sudo add-apt-repository ppa:webupd8team/java
@@ -33,8 +34,8 @@ JAVA_HOME=/usr/lib/jvm/java-7-oracle/
 PROFILE=/etc/profile
 
 source ./hadoop-xml-conf.sh
+
 CMD_OPTIONS=$(getopt -n "$0"  -o hif --long "help,interactive,file"  -- "$@")
-HADOOP_CONF_DIR=/etc/hadoop
 # Take care of bad options in the command
 if [ $? -ne 0 ];
 then
@@ -66,20 +67,24 @@ install()
 	#sudo usermod -G root,yarn ynuser
 	pdsh -w ^all_hosts  echo "export JAVA_HOME=$JAVA_HOME > /etc/profile.d/java.sh"
 
-        pdsh -w ^all_hosts  "source /etc/profile.d/java.sh"
         pdsh -w ^all_hosts  echo "export HADOOP_HOME=$HADOOP_HOME > /etc/profile.d/hadoop.sh"
         pdsh -w ^all_hosts  echo "export HADOOP_PREFIX=$HADOOP_HOME >> /etc/profile.d/hadoop.sh"
 	#add HADOOP_CONF_DIR in hadoop.sh too
 	pdsh -w ^all_hosts  echo "export HADOOP_CONF_DIR=$HADOOP_CONF_DIR >> /etc/profile.d/hadoop.sh"
-        pdsh -w ^all_hosts  "source /etc/profile.d/hadoop.sh"
 	
 	#append PATH to profile file only if it isn't set	
-	if ! grep -q "PATH=" "$PROFILE" ; then
+	if ! grep -q $HADOOP_HOME/bin $PROFILE ; then
 		pdsh -w ^all_hosts echo "export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin >> /etc/profile"
 	fi
 	
+	#source java.sh & hadoop.sh to make global variable effective 
+	pdsh -w ^all_hosts  "sudo chmod +x /etc/profile.d/hadoop.sh && sudo chmod +x /etc/profile.d/java.sh"
+        pdsh -w ^all_hosts  "source /etc/profile.d/hadoop.sh"
+        pdsh -w ^all_hosts  "source /etc/profile.d/java.sh"
 	pdsh -w ^all_hosts "source /etc/profile"
-	pdsh -w ^all_hosts  "echo $JAVA_HOME"
+	
+	#Check java environment on every node in cluster
+	pdsh -w ^all_hosts  "echo JAVA_HOME is: $JAVA_HOME"
 
 	echo "Extracting Hadoop $HADOOP_VERSION distribution on all hosts..."
 	pdsh -w ^all_hosts tar -zxf /opt/hadoop-"$HADOOP_VERSION".tar.gz -C /opt
@@ -143,21 +148,24 @@ install()
 	echo "Copying base Hadoop XML config files to all hosts..."
 	pdcp -w ^all_hosts core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml $HADOOP_HOME/etc/hadoop/
 
-		pdsh -w ^all_hosts "sudo ln -s $HADOOP_HOME/etc/hadoop /etc/hadoop"
+	pdsh -w ^all_hosts "sudo ln -s $HADOOP_HOME/etc/hadoop /etc/hadoop"
 	
-	echo 'student74' > $HADOOP_HOME/etc/hadoop/slaves
-	echo 'student75' >> $HADOOP_HOME/etc/hadoop/slaves
+	#echo 'student74' > $HADOOP_HOME/etc/hadoop/slaves
+	#echo 'student75' >> $HADOOP_HOME/etc/hadoop/slaves
+	
 	echo "Formatting the NameNode..."
 	if [ ! -d "$LOCK_DIR" ]; then		
 		pdsh -w ^all_hosts "sudo mkdir -p $LOCK_DIR"
 	fi
+
+	#in order to fix "JAVA_HOME not found issue"
 	sed -i "s|\${JAVA_HOME}|$JAVA_HOME|g" $HADOOP_HOME/etc/hadoop/hadoop-env.sh 
-	scp $HADOOP_HOME/etc/hadoop/hadoop-env.sh ynuser@student74:$HADOOP_HOME/etc/hadoop/
-	scp $HADOOP_HOME/etc/hadoop/hadoop-env.sh ynuser@student75:$HADOOP_HOME/etc/hadoop/
+	pdcp -w ^all_hosts $HADOOP_HOME/etc/hadoop/hadoop-env.sh $HADOOP_HOME/etc/hadoop/
+	#scp $HADOOP_HOME/etc/hadoop/hadoop-env.sh ynuser@student74:$HADOOP_HOME/etc/hadoop/
+	#scp $HADOOP_HOME/etc/hadoop/hadoop-env.sh ynuser@student75:$HADOOP_HOME/etc/hadoop/
 
 	pdsh -w ^nn_host "$HADOOP_HOME/bin/hdfs namenode -format"
 
-	 #/usr/bin/expect -c 'expect "\n" { eval spawn pdsh -w ^nn_host "sudo $HADOOP_HOME/bin/hdfs namenode -format"; interact }'
 	echo "Copying startup scripts to all hosts..."
 	pdcp -w ^nn_host hadoop-namenode /etc/init.d/
 	pdcp -w ^snn_host hadoop-secondarynamenode /etc/init.d/
@@ -184,12 +192,9 @@ install()
         pdsh -w ^mr_history_host "chmod 755 /etc/init.d/hadoop-historyserver && sudo sysv-rc-conf hadoop-historyserver on && sudo service hadoop-historyserver start"
 
 	echo "Running YARN smoke test..."
-#	#pdsh -w ^all_hosts "sudo usermod -a -G yarn $(whoami)"
 	hadoop fs -mkdir -p /user/$(whoami)
 	hadoop fs -chown -R $(whoami):yarn /user/$(whoami)
 	hadoop jar $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-examples-$HADOOP_VERSION.jar pi -Dmapreduce.clientfactory.class.name=org.apache.hadoop.mapred.YarnClientFactory -libjars $HADOOP_HOME/share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-$HADOOP_VERSION.jar 16 10000
-#
-##	hadoop job -list | egrep '^job' | awk '{print $1}' | xargs -n 1 -I {} sh -c "hadoop job -status {} | egrep '^tracking' | awk '{print \$3}'" | xargs -n 1 -I{} sh -c "echo -n {} | sed 's/.*jobid=//'; echo -n ' ';curl -s -XGET {} | grep 'Job Name' | sed 's/.* //' | sed 's/<br>//'"
 
 }
 
